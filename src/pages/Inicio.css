@@ -1,0 +1,57 @@
+.inicio-container {
+    height: 100vh;
+    width: 100%;
+    background: linear-gradient(135deg, #4A6CF7, #6AC4F0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.inicio-card {
+    text-align: center;
+    padding: 30px;
+}
+
+.mascota-img {
+    width: 180px;
+    height: auto;
+    margin-bottom: 20px;
+    animation: flotar 3s infinite ease-in-out;
+}
+
+@keyframes flotar {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.titulo-bienvenida {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+.btn-comenzar {
+    background-color: #FFC107;
+    border: none;
+    padding: 12px 28px;
+    font-size: 18px;
+    border-radius: 10px;
+    color: black;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-comenzar:hover {
+    background-color: #ffdf4d;
+    transform: scale(1.05);
+}

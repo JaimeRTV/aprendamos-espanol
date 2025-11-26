@@ -1,0 +1,77 @@
+.adivina-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.btn-volver {
+    background: #6b4ce6;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.titulo {
+    font-size: 26px;
+    margin: 20px 0;
+}
+
+.pista-box {
+    background: #f0f0f0;
+    padding: 18px;
+    border-radius: 10px;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.adivina-input {
+    width: 70%;
+    padding: 12px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    margin-bottom: 12px;
+    outline: none;
+    text-align: center;
+}
+
+.btn-verificar {
+    background: #3498db;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.mensaje {
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.mensaje.bien {
+    background: #c8f7c5;
+    color: #2e7d32;
+}
+
+.mensaje.mal {
+    background: #f8d7da;
+    color: #c62828;
+}
+
+.btn-siguiente {
+    background: #27ae60;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    margin-top: 12px;
+}
