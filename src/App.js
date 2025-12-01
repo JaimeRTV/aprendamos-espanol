@@ -6,7 +6,7 @@ import JuegosEducativos from "./components/juegos/juegosEducativos.jsx";
 
 import Memorama from "./components/juegos/memorama.jsx";
 import AdivinaPalabra from "./components/juegos/adivinaPalabra.jsx";
-
+import ImagenCorrecta from "./components/juegos/imagenCorrecta.jsx";
 // --- Vocabulario ---
 import VocabAnimales from "./components/vocab/vocabAnimales.jsx";
 import VocabComida from "./components/vocab/vocabComida.jsx";
@@ -27,6 +27,7 @@ import Verbos from "./components/gramatica/Verbos";
 import Pronombres from "./components/gramatica/Pronombres";
 import Adverbios from "./components/gramatica/Adverbios";
 import Oraciones from "./components/gramatica/Oraciones";
+
 
 function App() {
   const [pantalla, setPantalla] = useState("inicio");
@@ -78,7 +79,10 @@ function App() {
       {pantalla === "adivinaPalabra" && (
         <AdivinaPalabra onBack={() => setPantalla("juegos")} />
       )}
-
+      {/* ---------- Pantalla ADIVINA LA PALABRA ---------- */}
+      {pantalla === "Imagen-correcta" && (
+        <ImagenCorrecta onBack={() => setPantalla("juegos")} />
+      )}
       {/* ---------- Categorías individuales ---------- */}
       {pantalla === "categoria" && (
         <>
@@ -104,6 +108,8 @@ function App() {
       {pantalla === "articulos" && (
         <Articulos cambiarPantalla={setPantalla} />
       )}
+      
+
 
       {pantalla === "verbos" && (
         <Verbos cambiarPantalla={setPantalla} />

@@ -1,168 +1,210 @@
 import React, { useEffect, useState } from "react";
-import "./ArticuloShooter.css";
-import naveImg from "../../assets/Nave.png";
+import dragonImg from "../../assets/images/dragonGuardian.png";
+import "../../styles/gramatica/articulo.css";
 
-const ARTICULOS = ["el", "la", "los", "las", "un", "una", "unos", "unas"];
+function Articulos({ cambiarPantalla }) {
+  const oraciones = [
+    { texto: "___ gato está durmiendo.", correcta: "el" },
+    { texto: "___ casa es muy grande.", correcta: "la" },
+    { texto: "___ perros están jugando.", correcta: "los" },
+    { texto: "___ manzanas son rojas.", correcta: "las" },
+    { texto: "___ niño come una manzana.", correcta: "el" },
+    { texto: "___ niña canta una canción.", correcta: "la" },
+    { texto: "___ libros están sobre la mesa.", correcta: "los" },
+    { texto: "___ flores son hermosas.", correcta: "las" },
+    { texto: "___ coche es nuevo.", correcta: "el" },
+    { texto: "___ montaña es muy alta.", correcta: "la" },
+  ];
 
-export default function Articulos({ cambiarPantalla }) {
-  const [shipX, setShipX] = useState(50);
-  const [shots, setShots] = useState([]);
-  const [enemies, setEnemies] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [lives, setLives] = useState(3);
+  const [timeLeft, setTimeLeft] = useState(15);
   const [score, setScore] = useState(0);
-  const [level, setLevel] = useState(1);
-  const [objetivo, setObjetivo] = useState("el");
-  const [showLevel, setShowLevel] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
+  const [win, setWin] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [feedback, setFeedback] = useState("");
+  const [showFire, setShowFire] = useState(false);
+  const [shuffledOptions, setShuffledOptions] = useState([]);
 
-  /* ---------------- MOVIMIENTO DE NAVE ---------------- */
+  const totalSentences = oraciones.length;
+  const options = ["el", "la", "los", "las"];
+
+  /* Mezclar opciones */
   useEffect(() => {
-    const mover = (e) => {
-      if (e.key === "ArrowLeft") {
-        setShipX((x) => Math.max(x - 5, 0));
-      } else if (e.key === "ArrowRight") {
-        setShipX((x) => Math.min(x + 5, 100));
-      } else if (e.code === "Space") {
-        disparar();
-      }
-    };
-    window.addEventListener("keydown", mover);
-    return () => window.removeEventListener("keydown", mover);
-  }, []);
+    setShuffledOptions([...options].sort(() => Math.random() - 0.5));
+  }, [currentIndex]);
 
-  /* ---------------- CREAR ENEMIGOS ---------------- */
+  /* Temporizador */
   useEffect(() => {
-    const intervalo = setInterval(() => {
-      const palabra = ARTICULOS[Math.floor(Math.random() * ARTICULOS.length)];
-      setEnemies((prev) => [
-        ...prev,
-        {
-          id: Date.now() + Math.random(),
-          text: palabra,
-          x: Math.random() * 90,
-          y: 0,
-        },
-      ]);
-    }, 1500 - level * 100);
-    return () => clearInterval(intervalo);
-  }, [level]);
+    if (gameOver || win || selected) return;
 
-  /* ---------------- MOVER ENEMIGOS ---------------- */
-  useEffect(() => {
-    const intervalo = setInterval(() => {
-      setEnemies((prev) =>
-        prev.map((e) => ({
-          ...e,
-          y: e.y + 1 + level,
-        }))
-      );
-    }, 40);
-    return () => clearInterval(intervalo);
-  }, [level]);
+    if (timeLeft <= 0) {
+      perderVida();
+      return;
+    }
 
-  /* ---------------- DISPARAR ---------------- */
-  const disparar = () => {
-    setShots((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        x: shipX + 3,
-        y: 85,
-      },
-    ]);
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, selected, gameOver, win]);
+
+  const perderVida = () => {
+    setFeedback("¡Tiempo agotado! 🔥");
+    setShowFire(true);
+
+    setTimeout(() => {
+      setShowFire(false);
+      setLives((l) => {
+        const nuevo = l - 1;
+        if (nuevo <= 0) setGameOver(true);
+        else nextSentence();
+        return nuevo;
+      });
+    }, 1500);
   };
 
-  /* ---------------- MOVER DISPAROS ---------------- */
-  useEffect(() => {
-    const intervalo = setInterval(() => {
-      setShots((prev) => prev.map((s) => ({ ...s, y: s.y - 2 })));
-    }, 30);
-    return () => clearInterval(intervalo);
-  }, []);
+  const nextSentence = () => {
+    const next = currentIndex + 1;
+    if (next >= totalSentences) {
+      setWin(true);
+      return;
+    }
+    setCurrentIndex(next);
+    setTimeLeft(15);
+    setSelected(null);
+    setFeedback("");
+  };
 
-  /* ---------------- COLISIONES ---------------- */
-  useEffect(() => {
-    shots.forEach((shot) => {
-      enemies.forEach((enemy) => {
-        if (
-          shot.y < enemy.y + 5 &&
-          shot.y > enemy.y - 5 &&
-          shot.x > enemy.x - 5 &&
-          shot.x < enemy.x + 10
-        ) {
-          // Eliminar disparo y enemigo
-          setShots((prev) => prev.filter((s) => s.id !== shot.id));
-          setEnemies((prev) => prev.filter((e) => e.id !== enemy.id));
+  const handleAnswer = (option) => {
+    if (selected || gameOver || win) return;
+    setSelected(option);
 
-          // Puntaje
-          if (enemy.text === objetivo) {
-            setScore((s) => s + 10);
-          } else {
-            setScore((s) => Math.max(0, s - 5));
-          }
+    const correcta = oraciones[currentIndex].correcta;
 
-          // Subir nivel
-          if (score > 0 && score % 50 === 0) {
-            setLevel((l) => l + 1);
-            setShowLevel(true);
-            setTimeout(() => setShowLevel(false), 1500);
-          }
-        }
-      });
-    });
-  }, [shots, enemies, objetivo, score]);
+    if (option === correcta) {
+      const bonus = Math.floor(timeLeft * 2);
+      setScore((s) => s + 50 + bonus);
+      setFeedback("¡Perfecto!");
 
-  /* ---------------- OBJETIVO CAMBIA POR NIVEL ---------------- */
-  useEffect(() => {
-    setObjetivo(ARTICULOS[Math.floor(Math.random() * ARTICULOS.length)]);
-  }, [level]);
+      setTimeout(nextSentence, 1200);
+    } else {
+      setFeedback(`¡Incorrecto! Era: ${correcta}`);
+      setShowFire(true);
+
+      setTimeout(() => {
+        setShowFire(false);
+        setLives((l) => {
+          const nuevo = l - 1;
+          if (nuevo <= 0) setGameOver(true);
+          else nextSentence();
+          return nuevo;
+        });
+      }, 1500);
+    }
+  };
+
+  const resetGame = () => {
+    setCurrentIndex(0);
+    setLives(3);
+    setTimeLeft(15);
+    setScore(0);
+    setGameOver(false);
+    setWin(false);
+    setSelected(null);
+    setFeedback("");
+    setShowFire(false);
+  };
 
   return (
-    <div className="shooter-container">
-      {/* Barra superior */}
+    <div className="dragon-container">
       <div className="info-bar">
-        <span>🎯 Artículo objetivo: {objetivo}</span>
-        <span>⭐ Puntos: {score} | Nivel: {level}</span>
+        <div className="game-title">Dragón Guardián del Tesoro</div>
+        <div>Puntos: {score} ⭐ | Vidas: {Array(lives).fill("❤️").join(" ")} | {currentIndex + 1}/{totalSentences}</div>
       </div>
 
-      {/* Botón salir */}
       <button className="exit-btn" onClick={() => cambiarPantalla("gramatica")}>
-        🚪 Salir
+        ← Volver
       </button>
 
-      {/* Área del juego */}
-      <div className="game-area">
-        {/* Nave */}
-        <img
-          src={naveImg}
-          className="player-ship"
-          style={{ left: `${shipX}%` }}
-          alt="Nave"
-        />
-
-        {/* Disparos */}
-        {shots.map((shot) => (
-          <div
-            key={shot.id}
-            className="shot"
-            style={{ left: `${shot.x}%`, top: `${shot.y}%` }}
-          ></div>
-        ))}
-
-        {/* Enemigos */}
-        {enemies.map((enemy) => (
-          <div
-            key={enemy.id}
-            className="enemy"
-            style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }}
-          >
-            {enemy.text}
+      {!gameOver && !win && (
+        <div className="game-area">
+          <div className="dragon-wrapper">
+            <img src={dragonImg} alt="Dragón" className="dragon-image" />
+            {showFire && <div className="dragon-fire"></div>}
           </div>
-        ))}
 
-        {/* Mensaje de nivel */}
-        {showLevel && (
-          <div className="level-complete">🚀 ¡Nivel {level}! 🚀</div>
-        )}
-      </div>
+          <div className="dragon-text">¡Elige el artículo correcto!</div>
+
+          <div className="sentence">
+            <h2>{oraciones[currentIndex].texto}</h2>
+          </div>
+
+          <div className="timer-bar">
+            <div
+              className="timer-progress"
+              style={{ width: `${(timeLeft / 15) * 100}%` }}
+            ></div>
+            <span>{timeLeft}s</span>
+          </div>
+
+          {feedback && (
+            <div
+              className={`feedback ${
+                feedback.includes("Perfecto") ? "correct" : "wrong"
+              }`}
+            >
+              {feedback}
+            </div>
+          )}
+
+          <div className="options-grid">
+            {shuffledOptions.map((opt) => (
+              <button
+                key={opt}
+                className={`option-btn ${
+                  selected === opt
+                    ? opt === oraciones[currentIndex].correcta
+                      ? "correct"
+                      : "wrong"
+                    : ""
+                }`}
+                onClick={() => handleAnswer(opt)}
+                disabled={!!selected}
+              >
+                {opt.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {win && (
+        <div className="treasure-win">
+          <div className="win-message">
+            <div>¡LO LOGRASTE! 🎉</div>
+            <div>El dragón te dio el tesoro</div>
+            <div>Puntuación final: {score}</div>
+          </div>
+          <button className="restart-btn" onClick={resetGame}>Reintentar</button>
+          <button className="exit-btn" onClick={() => cambiarPantalla("gramatica")}>Menú</button>
+        </div>
+      )}
+
+      {gameOver && (
+        <div className="game-over-overlay">
+          <div className="game-over">
+            <div>¡El dragón te quemó! 🔥</div>
+            <div>Puntuación: {score}</div>
+            <button className="restart-btn" onClick={resetGame}>Reintentar</button>
+            <button className="exit-btn" onClick={() => cambiarPantalla("gramatica")}>Menú</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+export default Articulos;
